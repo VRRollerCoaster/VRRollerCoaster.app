@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119583227-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-119583227-1');
+    </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- These tags are needed for enabling experimental Chrome APIs via Chrome's Origin-Trial program (Android, Windows): https://github.com/GoogleChrome/OriginTrials/blob/gh-pages/available-trials.md#current-experimental-features -->
+    <!-- Origin Trial Token, feature = Generic Sensors, origin = https://github.io, expires = 2018-04-10 -->
+    <meta http-equiv="origin-trial" data-feature="Generic Sensors" data-expires="2018-04-10" content="Aokv0ODVMUPIswIBi6DnpAIjhWefEd8gD8GpVgdYgETj0C5+/3kKMzZE/FOrBwHcpBO6LHuVRrIw3yOT8EMmJAYAAABQeyJvcmlnaW4iOiJodHRwczovL2dpdGh1Yi5pbzo0NDMiLCJmZWF0dXJlIjoiR2VuZXJpY1NlbnNvciIsImV4cGlyeSI6MTUyMzMxODQwMH0=">
+    <!-- Origin Trial Token, feature = WebVR (For Chrome M62+), origin = https://github.io, expires = 2018-05-07 -->
+    <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="2018-05-07" content="AgINztgDnjFV8da2D9SSzIITBRlHX8mduCR7DXfENxjr9ALduKOxBDdn2n66auQSlljVyhnRWWerxC0BWbE8pAoAAABOeyJvcmlnaW4iOiJodHRwczovL2dpdGh1Yi5pbzo0NDMiLCJmZWF0dXJlIjoiV2ViVlIxLjFNNjIiLCJleHBpcnkiOjE1MjU3MjU4MDh9">
+    <title>WebVR Roller Coaster | Ride a Virtual Reality RollerCoaster</title>
+    <meta name="description" content="Web VR Roller Coaster - Ride a virtual reality roller coaster from your web browser! Supports the HTC Vive, Oculus Rift, Samsung Gear VR, as well as Google Daydream & Google Cardboard.">
+    <meta name="keywords" content="vr,virtual,reality,webvr,web,roller,coaster,rollercoaster,htc,vive,oculus,rift,gear,google,daydream,cardboard">
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" type="text/css" href="styles/webvr.css">
+    <script src="lib/telemetry.js"></script>
+    <script>
+      MozillaResearch.telemetry.start({
+        analytics: true,
+        errorLogging: true,
+        performance: true
+      });
+      MozillaResearch.telemetry.performance.mark('LoaderParsingStart');
+    </script>
+    <script src="Build/UnityLoader.js"></script>
+    <script>
+      /* global UnityLoader, MozillaResearch */
+      MozillaResearch.telemetry.performance.measure('LoaderParsing', 'LoaderParsingStart');
+      (function () {
+        UnityLoader.SystemInfo.mobile = false;  // Workaround to force `UnityLoader` to actually load on mobile.
+        MozillaResearch.telemetry.performance.mark('LoadingStart');
+        window.gameInstance = UnityLoader.instantiate('gameContainer', 'Build/test-build-4.json', {
+          Module: {
+            // `preserveDrawingBuffer` is needed for WebVR content to be mirrored to the `<canvas>`.
+            webglContextAttributes: {
+              preserveDrawingBuffer: true
+            }
+          },
+          onProgress: unityProgress
+        });
+
+        function onActivate (evt) {
+          return new Promise(function (resolve, reject) {
+            if (!evt.display) {
+              return reject(new Error('No `display` property found on event'));
+            }
+            if (evt.reason && evt.reason !== 'navigation') {
+              return reject(new Error("Unexpected `reason` (expected to be 'navigation')"));
+            }
+            if (!evt.display.capabilities || !evt.display.capabilities.canPresent) {
+              return reject(new Error('VR display is not capable of presenting'));
+            }
+            gameInstance.vrDisplay = evt.display;
+            return evt.display.requestPresent([{source: gameInstance.Module.canvas}]).then(function () {
+              console.log('Entered VR mode');
+            }).catch(function (err) {
+              console.error('Unable to enter VR mode:', err);
+            });
+          });
+        }
+        window.addEventListener('vrdisplayactivate', onActivate);
+
+        function unityProgress (gameInstance, progress) {
+          if (!gameInstance.progress) {
+            gameInstance.loader = document.getElementById('loader');
+            gameInstance.progress = document.getElementById('progress');
+            gameInstance.loading = document.getElementById('loading');
+          }
+          gameInstance.progress.style.width = (100 * progress) + '%';
+          if (progress === 1) {
+            document.dispatchEvent(new CustomEvent('UnityLoaded'));
+          }
+        }
+      })();
+    </script>
+    <link rel="manifest" href="manifest.webmanifest">
+  </head>
+  <body>
+    <div id="loader">
+      <div id="loading" class="loading">Loading</div>
+      <div id="progress" class="progress"></div>
+    </div>
+
+    <div id="game">
+      <div id="gameContainer"></div>
+    </div>
+
+    <div id="instruction">
+      <div id="novr" class="panel center">
+        <h3>You&rsquo;ll need a <a href="https://webvr.rocks/">WebVR-enabled browser</a> and VR headset to fully enjoy this experience.</h3>
+        <p><img src="mousedrag.png" width="70" alt="Click-and-drag your mouse"></p>
+        <p>In the meantime, <strong><em>click and drag</em></strong> to have a look around!</p>
+        <p>
+          <button class="confirm">Continue</button>
+        </p>
+      </div>
+    </div>
+
+    <div id="vr">
+      <div id="status">
+        <strong>Ready!</strong>
+        <div id="icons">
+          <img src="vr.png" height="36" alt="VR icon">
+          <template id="motion-controller">
+            <img src="motion-controllers.png" height="33" alt="Motion Controller icon">
+          </template>
+        </div>
+        <small><a href="https://webvr.rocks/">Not working?</a></small>
+      </div>
+      <button id="entervr" value="Enter VR"></button>
+    </div>
+
+    <script src="vendor/gl-matrix-min.js"></script>
+    <script src="vendor/webvr-polyfill.min.js"></script>
+    <script src="webvr.js"></script>
+  </body>
+
+</html>
