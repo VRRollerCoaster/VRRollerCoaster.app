@@ -1,3 +1,5 @@
+![VRRollerCoaster.app Screenshot](https://github.com/VRRollerCoaster/VRRollerCoaster.app/blob/master/virtual-reality-rollercoaster-screenshot.png)
+
 # VRRollerCoaster.app
 WebVR Roller Coaster | 3D Virtual Reality RollerCoaster Ride
 
